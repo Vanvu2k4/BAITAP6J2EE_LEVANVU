@@ -1,53 +1,46 @@
 package com.example.demo.service;
 
 import com.example.demo.model.Product;
+import com.example.demo.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import lombok.RequiredArgsConstructor;
+
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class ProductService {
 
-    private final List<Product> list = new ArrayList<>();
+    private final ProductRepository productRepository;
 
+    // Lấy tất cả sản phẩm
     public List<Product> getAll() {
-        return list;
+        return productRepository.findAll();
     }
 
+    // Lấy sản phẩm theo id
     public Product get(int id) {
-        return list.stream()
-                .filter(p -> p.getId() == id)
-                .findFirst()
-                .orElse(null);
+        return productRepository.findById(id).orElse(null);
     }
 
+    // Thêm sản phẩm
     public void add(Product product) {
-        int maxId = list.stream()
-                .mapToInt(Product::getId)
-                .max()
-                .orElse(0);
-
-        product.setId(maxId + 1);
-        list.add(product);
+        productRepository.save(product);
     }
 
+    // Update
     public void update(Product product) {
-        Product old = get(product.getId());
-        if (old != null) {
-            old.setName(product.getName());
-            old.setPrice(product.getPrice());
-            old.setCategory(product.getCategory());
-            if (product.getImage() != null) {
-                old.setImage(product.getImage());
-            }
-        }
+        productRepository.save(product);
     }
 
+    // Delete
     public void delete(int id) {
-        list.removeIf(p -> p.getId() == id);
+        productRepository.deleteById(id);
     }
 
     // Upload image
@@ -55,6 +48,7 @@ public class ProductService {
 
         if (!file.isEmpty()) {
             try {
+
                 String uploadDir = System.getProperty("user.dir") + "/uploads/";
                 Path uploadPath = Paths.get(uploadDir);
 

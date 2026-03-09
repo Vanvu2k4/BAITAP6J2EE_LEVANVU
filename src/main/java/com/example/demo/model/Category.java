@@ -1,17 +1,16 @@
 package com.example.demo.model;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import jakarta.persistence.*;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-
+@Data
+@Entity
 public class Category {
 
-        private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-        @NotBlank(message = "Tên danh mục không được để trống")
-        private String name;
+    @Column(nullable = false, length = 255)
+    private String name;
 }
