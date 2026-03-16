@@ -28,9 +28,9 @@ public class ProductController {
         return "product/products";
     }
 
-    // FORM CREATE
-    @GetMapping("/create")
-    public String createForm(Model model) {
+    // FORM ADD
+    @GetMapping("/add")
+    public String addForm(Model model) {
 
         model.addAttribute("product", new Product());
         model.addAttribute("categories", categoryService.getAll());
@@ -38,9 +38,9 @@ public class ProductController {
         return "product/create";
     }
 
-    // CREATE PRODUCT
-    @PostMapping("/create")
-    public String create(
+    // ADD PRODUCT
+    @PostMapping("/add")
+    public String add(
             @Valid @ModelAttribute Product product,
             BindingResult result,
             @RequestParam("imageFile") MultipartFile file,
