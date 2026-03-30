@@ -15,6 +15,14 @@
             overflow: hidden;
         }
 
+        .filter-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
         .table thead {
             background: linear-gradient(45deg, #1e3c72, #2a5298);
             color: white;
@@ -53,6 +61,52 @@
             font-weight: 700;
             letter-spacing: 1px;
         }
+
+        .pagination-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-nav a, .pagination-nav span {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pagination-nav a:hover {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .pagination-nav .disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .cart-badge {
+            position: relative;
+            display: inline-block;
+        }
+
+        .cart-badge-number {
+            position: absolute;
+            top: -8px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -63,9 +117,57 @@
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="page-title">Product Management</h2>
-        <a th:href="@{/products/add}" class="btn btn-primary btn-custom shadow">
-            <i class="bi bi-plus-circle"></i> Create Product
-        </a>
+        <div>
+            <a th:href="@{/cart}" class="btn btn-info btn-custom shadow me-2">
+                <i class="bi bi-cart"></i> View Cart
+            </a>
+            <a th:href="@{/products/add}" class="btn btn-primary btn-custom shadow">
+                <i class="bi bi-plus-circle"></i> Create Product
+            </a>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTER SECTION -->
+    <div class="filter-card">
+        <form th:action="@{/products}" method="get" class="row g-3">
+            <!-- Search by Keyword -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-search"></i> Search by Name</label>
+                <input type="text" name="keyword" class="form-control" th:value="${keyword}" placeholder="Enter product name">
+            </div>
+
+            <!-- Filter by Category -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-funnel"></i> Category</label>
+                <select name="categoryId" class="form-select">
+                    <option value="">All Categories</option>
+                    <option th:each="cat : ${categories}"
+                            th:value="${cat.id}"
+                            th:text="${cat.name}"
+                            th:selected="${categoryId == cat.id}"></option>
+                </select>
+            </div>
+
+            <!-- Sort by Price -->
+            <div class="col-md-3">
+                <label class="form-label"><i class="bi bi-sort-down"></i> Sort by Price</label>
+                <select name="sortBy" class="form-select">
+                    <option value="id" th:selected="${sortBy == 'id'}">Default</option>
+                    <option value="price_asc" th:selected="${sortBy == 'price_asc'}">Price: Low to High</option>
+                    <option value="price_desc" th:selected="${sortBy == 'price_desc'}">Price: High to Low</option>
+                </select>
+            </div>
+
+            <!-- Submit & Reset -->
+            <div class="col-md-3 d-flex gap-2 align-items-end">
+                <button type="submit" class="btn btn-success btn-custom flex-grow-1">
+                    <i class="bi bi-search"></i> Search
+                </button>
+                <a th:href="@{/products}" class="btn btn-secondary btn-custom">
+                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                </a>
+            </div>
+        </form>
     </div>
 
     <!-- CARD -->
@@ -80,7 +182,7 @@
                     <th>Price</th>
                     <th>Image</th>
                     <th>Category</th>
-                    <th width="200">Action</th>
+                    <th width="250">Action</th>
                 </tr>
                 </thead>
 
@@ -90,7 +192,7 @@
                     <td class="fw-semibold" th:text="${p.name}"></td>
 
                     <td class="fw-bold text-primary"
-                        th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')}">
+                        th:text="${#numbers.formatDecimal(p.price,0,'COMMA',0,'POINT')} + ' VND'">
                     </td>
 
                     <td>
@@ -110,15 +212,20 @@
                     </td>
 
                     <td>
+                        <a th:href="@{/products/add-to-cart/{id}(id=${p.id})}"
+                           class="btn btn-success btn-sm btn-custom me-1">
+                            <i class="bi bi-cart-plus"></i> Add to Cart
+                        </a>
+
                         <a th:href="@{/products/edit/{id}(id=${p.id})}"
-                           class="btn btn-warning btn-sm btn-custom me-2">
-                            <i class="bi bi-pencil-square"></i>
+                           class="btn btn-warning btn-sm btn-custom me-1">
+                            <i class="bi bi-pencil-square"></i> Edit
                         </a>
 
                         <a th:href="@{/products/delete/{id}(id=${p.id})}"
                            class="btn btn-danger btn-sm btn-custom"
                            onclick="return confirm('Are you sure?')">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-trash"></i> Delete
                         </a>
                     </td>
                 </tr>
@@ -134,6 +241,33 @@
             </table>
 
         </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-nav">
+        <a th:if="${currentPage > 0}"
+           th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy}, page=${currentPage - 1})}"
+           class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-chevron-left"></i> Previous
+        </a>
+
+        <span th:if="${currentPage == 0}" class="disabled">
+            <i class="bi bi-chevron-left"></i> Previous
+        </span>
+
+        <span class="btn btn-light btn-sm disabled">
+            Page <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span>
+        </span>
+
+        <a th:if="${currentPage + 1 < totalPages}"
+           th:href="@{/products(keyword=${keyword}, categoryId=${categoryId}, sortBy=${sortBy}, page=${currentPage + 1})}"
+           class="btn btn-outline-primary btn-sm">
+            Next <i class="bi bi-chevron-right"></i>
+        </a>
+
+        <span th:if="${currentPage + 1 >= totalPages}" class="disabled">
+            Next <i class="bi bi-chevron-right"></i>
+        </span>
     </div>
 
 </div>

@@ -18,12 +18,12 @@ public class SecurityConfig {
 
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/uploads/**").permitAll()
-                        .requestMatchers("/403").permitAll()
+                        .requestMatchers("/403", "/register").permitAll()
                         .requestMatchers("/products/add", "/products/add/**").hasRole("ADMIN")
                         .requestMatchers("/products/edit", "/products/edit/**").hasRole("ADMIN")
                         .requestMatchers("/products/delete", "/products/delete/**").hasRole("ADMIN")
