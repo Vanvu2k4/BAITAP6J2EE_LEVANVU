@@ -13,6 +13,7 @@ public class OrderDetail {
     private Integer id;
 
     @ManyToOne
+
     @JoinColumn(name = "order_id")
     private Order order;
 

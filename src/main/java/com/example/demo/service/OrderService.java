@@ -1,12 +1,13 @@
 package com.example.demo.service;
 
+import com.example.demo.model.Account;
 import com.example.demo.model.Order;
 import com.example.demo.model.OrderDetail;
 import com.example.demo.model.Product;
-import com.example.demo.repository.OrderDetailRepository;
 import com.example.demo.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,47 +18,48 @@ import java.util.Map;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final OrderDetailRepository orderDetailRepository;
     private final ProductService productService;
 
     // Tạo đơn hàng từ giỏ hàng
-    public Order createOrder(com.example.demo.model.Account account, Map<Integer, Integer> cart) {
+    @Transactional
+    public Order createOrder(Account account, Map<Integer, Integer> cart) {
+        if (account == null) {
+            throw new IllegalArgumentException("Tai khoan khong hop le");
+        }
+        if (cart == null || cart.isEmpty()) {
+            throw new IllegalArgumentException("Gio hang rong");
+        }
+
         Order order = new Order();
         order.setAccount(account);
         order.setOrderDate(LocalDateTime.now());
         order.setStatus("PENDING");
 
-        List<OrderDetail> orderDetails = new java.util.ArrayList<>();
-        long totalPrice = 0;
+        long totalPrice = 0L;
 
-        for (Integer productId : cart.keySet()) {
-            Product product = productService.get(productId);
-            if (product != null) {
-                int quantity = cart.get(productId);
+        for (Map.Entry<Integer, Integer> entry : cart.entrySet()) {
+            Product product = productService.get(entry.getKey());
+            Integer quantity = entry.getValue();
 
-                OrderDetail detail = new OrderDetail();
-                detail.setOrder(order);
-                detail.setProduct(product);
-                detail.setQuantity(quantity);
-                detail.setPrice(product.getPrice());
-
-                orderDetails.add(detail);
-                totalPrice += product.getPrice() * quantity;
+            if (product == null || quantity == null || quantity <= 0) {
+                continue;
             }
+
+            OrderDetail detail = new OrderDetail();
+            detail.setProduct(product);
+            detail.setQuantity(quantity);
+            detail.setPrice(product.getPrice());
+
+            order.addOrderDetail(detail);
+            totalPrice += product.getPrice() * quantity;
         }
 
-        order.setOrderDetails(orderDetails);
+        if (order.getOrderDetails().isEmpty()) {
+            throw new IllegalArgumentException("Khong co san pham hop le de dat hang");
+        }
+
         order.setTotalPrice(totalPrice);
-
-        // Lưu order
-        Order savedOrder = orderRepository.save(order);
-
-        // Lưu order details
-        for (OrderDetail detail : orderDetails) {
-            orderDetailRepository.save(detail);
-        }
-
-        return savedOrder;
+        return orderRepository.save(order);
     }
 
     // Lấy tất cả đơn hàng
@@ -89,4 +91,3 @@ public class OrderService {
         orderRepository.deleteById(id);
     }
 }
-

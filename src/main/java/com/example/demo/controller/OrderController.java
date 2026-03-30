@@ -1,14 +1,18 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Account;
+import com.example.demo.model.Order;
 import com.example.demo.service.AccountService;
 import com.example.demo.service.OrderService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.security.Principal;
 import java.util.Map;
 
 @Controller
@@ -35,39 +39,32 @@ public class OrderController {
 
     // CHECKOUT
     @GetMapping("/checkout")
-    public String checkout(HttpSession session, Model model) {
-
-        // Lấy thông tin người dùng từ session
-        String username = (String) session.getAttribute("username");
-
-        if (username == null || username.isEmpty()) {
-            return "redirect:/login"; // Redirect to login if not authenticated
+    public String checkout(HttpSession session, Principal principal, Model model) {
+        if (principal == null) {
+            return "redirect:/login";
         }
 
-        // Lấy giỏ hàng
         @SuppressWarnings("unchecked")
         Map<Integer, Integer> cart = (Map<Integer, Integer>) session.getAttribute("cart");
 
         if (cart == null || cart.isEmpty()) {
-            return "redirect:/cart"; // Redirect if cart is empty
+            return "redirect:/cart";
         }
 
-        // Lấy tài khoản theo loginName
-        Account account = accountService.findByLoginName(username);
+        Account account = accountService.findByLoginName(principal.getName());
         if (account == null) {
             return "redirect:/login";
         }
 
-        // Tạo đơn hàng
-        com.example.demo.model.Order order = orderService.createOrder(account, cart);
-
-        // Xóa giỏ hàng
-        session.removeAttribute("cart");
-
-        model.addAttribute("order", order);
-        model.addAttribute("message", "Đặt hàng thành công! Mã đơn hàng: #" + order.getId());
-
-        return "order/checkout-success";
+        try {
+            Order order = orderService.createOrder(account, cart);
+            session.removeAttribute("cart");
+            model.addAttribute("order", order);
+            model.addAttribute("message", "Đặt hàng thành công! Mã đơn hàng: #" + order.getId());
+            return "order/checkout-success";
+        } catch (IllegalArgumentException ex) {
+            return "redirect:/cart";
+        }
     }
 
     // CANCEL ORDER
@@ -77,5 +74,3 @@ public class OrderController {
         return "redirect:/orders";
     }
 }
-
-

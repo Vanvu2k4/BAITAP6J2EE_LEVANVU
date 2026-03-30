@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Shopping Cart</title>
+    <title>Gio hang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
@@ -87,9 +87,9 @@
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <h2 class="page-title"><i class="bi bi-cart-check"></i> Shopping Cart</h2>
+        <h2 class="page-title"><i class="bi bi-cart-check"></i> Gio hang</h2>
         <a th:href="@{/products}" class="btn btn-primary btn-custom shadow">
-            <i class="bi bi-arrow-left"></i> Continue Shopping
+            <i class="bi bi-arrow-left"></i> Tiep tuc mua sam
         </a>
     </div>
 
@@ -102,7 +102,7 @@
 
                     <!-- CART ITEMS SECTION -->
                     <div th:if="${!cartDetails.isEmpty()}">
-                        <h5 class="mb-4"><i class="bi bi-list-check"></i> Your Items</h5>
+                        <h5 class="mb-4"><i class="bi bi-list-check"></i> San pham da chon</h5>
 
                         <div th:each="entry : ${cartDetails.entrySet()}">
                             <div class="cart-item d-flex justify-content-between align-items-center">
@@ -111,17 +111,17 @@
                                     <img th:if="${entry.key.image != null}"
                                          th:src="@{'/uploads/' + ${entry.key.image}}"
                                          class="product-img me-3 shadow-sm"
-                                         alt="Product Image">
+                                         alt="Hinh san pham">
 
                                     <img th:if="${entry.key.image == null}"
                                          src="https://via.placeholder.com/100?text=No+Image"
                                          class="product-img me-3 shadow-sm"
-                                         alt="No Image">
+                                         alt="Khong co hinh">
 
                                     <div>
                                         <h6 class="mb-1" th:text="${entry.key.name}"></h6>
                                         <p class="text-muted mb-0">
-                                            Price: <span class="fw-bold" th:text="${#numbers.formatDecimal(entry.key.price,0,'COMMA',0,'POINT')} + ' VND'"></span>
+                                            Don gia: <span class="fw-bold" th:text="${#numbers.formatDecimal(entry.key.price,0,'COMMA',0,'POINT')} + ' VND'"></span>
                                         </p>
                                     </div>
                                 </div>
@@ -139,19 +139,19 @@
                                         <button type="button" class="btn btn-sm btn-outline-secondary" onclick="increaseQty(this)">
                                             <i class="bi bi-plus"></i>
                                         </button>
-                                        <button type="submit" class="btn btn-sm btn-info">Update</button>
+                                        <button type="submit" class="btn btn-sm btn-info">Cap nhat</button>
                                     </form>
 
                                     <div class="text-end" style="min-width: 120px;">
                                         <p class="mb-0"><strong th:text="${#numbers.formatDecimal(entry.key.price * entry.value,0,'COMMA',0,'POINT')} + ' VND'"></strong></p>
-                                        <small class="text-muted" th:text="'Qty: ' + ${entry.value}"></small>
+                                        <small class="text-muted" th:text="'SL: ' + ${entry.value}"></small>
                                     </div>
                                 </div>
 
                                 <!-- Remove Button -->
                                 <a th:href="@{/cart/remove/{id}(id=${entry.key.id})}"
                                    class="btn btn-danger btn-sm btn-custom"
-                                   onclick="return confirm('Remove from cart?')">
+                                   onclick="return confirm('Xoa san pham khoi gio?')">
                                     <i class="bi bi-trash"></i>
                                 </a>
                             </div>
@@ -161,8 +161,8 @@
                         <div class="mt-4 pt-3 border-top">
                             <a th:href="@{/cart/clear}"
                                class="btn btn-outline-danger btn-custom"
-                               onclick="return confirm('Clear entire cart?')">
-                                <i class="bi bi-x-circle"></i> Clear Cart
+                               onclick="return confirm('Ban co muon xoa toan bo gio hang?')">
+                                <i class="bi bi-x-circle"></i> Xoa gio hang
                             </a>
                         </div>
 
@@ -171,10 +171,10 @@
                     <!-- EMPTY CART MESSAGE -->
                     <div th:if="${cartDetails.isEmpty()}" class="empty-cart">
                         <i class="bi bi-cart-x"></i>
-                        <h5 class="mt-3">Your cart is empty</h5>
-                        <p class="text-muted">Start adding products to your cart!</p>
+                        <h5 class="mt-3">Gio hang dang trong</h5>
+                        <p class="text-muted">Hay them san pham vao gio hang cua ban.</p>
                         <a th:href="@{/products}" class="btn btn-primary btn-custom mt-3">
-                            <i class="bi bi-shop"></i> Continue Shopping
+                            <i class="bi bi-shop"></i> Tiep tuc mua sam
                         </a>
                     </div>
 
@@ -185,42 +185,42 @@
         <!-- ORDER SUMMARY -->
         <div class="col-lg-4">
             <div class="summary-card">
-                <h5 class="mb-4"><i class="bi bi-receipt"></i> Order Summary</h5>
+                <h5 class="mb-4"><i class="bi bi-receipt"></i> Tom tat don hang</h5>
 
                 <div class="summary-row">
-                    <span>Subtotal:</span>
+                    <span>Tam tinh:</span>
                     <span th:text="${#numbers.formatDecimal(totalPrice,0,'COMMA',0,'POINT')} + ' VND'"></span>
                 </div>
 
                 <div class="summary-row">
-                    <span>Shipping:</span>
-                    <span class="text-success">Free</span>
+                    <span>Van chuyen:</span>
+                    <span class="text-success">Mien phi</span>
                 </div>
 
                 <div class="summary-row">
-                    <span>Tax:</span>
+                    <span>Thue:</span>
                     <span th:text="${#numbers.formatDecimal(totalPrice * 0.1,0,'COMMA',0,'POINT')} + ' VND'"></span>
                 </div>
 
                 <div class="summary-row total">
-                    <span>Total:</span>
+                    <span>Tong cong:</span>
                     <span th:text="${#numbers.formatDecimal(totalPrice + (totalPrice * 0.1),0,'COMMA',0,'POINT')} + ' VND'"></span>
                 </div>
 
                 <div class="mt-4" th:if="${!cartDetails.isEmpty()}">
                     <a th:href="@{/orders/checkout}" class="btn btn-success btn-custom w-100 btn-lg">
-                        <i class="bi bi-check-circle"></i> Proceed to Checkout
+                        <i class="bi bi-check-circle"></i> Dat hang
                     </a>
                 </div>
 
                 <div class="mt-4" th:if="${cartDetails.isEmpty()}">
                     <button class="btn btn-success btn-custom w-100 btn-lg" disabled>
-                        <i class="bi bi-lock"></i> Cart is Empty
+                        <i class="bi bi-lock"></i> Gio hang rong
                     </button>
                 </div>
 
                 <a th:href="@{/products}" class="btn btn-outline-primary btn-custom w-100 mt-2">
-                    <i class="bi bi-arrow-left"></i> Back to Products
+                    <i class="bi bi-arrow-left"></i> Ve danh sach san pham
                 </a>
 
             </div>
